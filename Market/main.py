@@ -1,4 +1,5 @@
 import subprocess
+import GUI
 
 class bcolors:
     HEADER = '\033[95m'
@@ -11,7 +12,12 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-print(bcolors.HEADER + "Запускаю скрипты...")
-subprocess.run(["python", "SQLconnect.py"])
-subprocess.run(["python", "cppLINKER.py"])
-print("Все скрипты выполнены!")
+print(bcolors.OKCYAN+"///MARKET MENEGMENT APPLICATION///!")
+
+print(bcolors.HEADER + "Linking files...")
+try:
+    subprocess.run(["python", "SQLconnect.py"])
+    subprocess.run(["python", "cppLINKER.py"])
+    print("All files linked!")
+except Exception as e:
+    print(bcolors.WARNING+"Error with file linking")

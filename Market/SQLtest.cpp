@@ -2,7 +2,9 @@
 #include <iostream>
 #include <windows.h>
 
+using namespace std;
+
 int main()
 {
-    std::cout << "Hello from C++!\n";
+    cout << "Hello from C++!\n";
 }
