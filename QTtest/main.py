@@ -6,8 +6,8 @@ import sqlite3
 from PyQt6.QtCore import QTimer
 
 DISCOUNT = 0
+VALUES = []
 
-#SQL PART
 conn = sqlite3.connect("store.db")
 cursor = conn.cursor()
 
@@ -144,10 +144,10 @@ class DialogBUFFER(QMainWindow):
             self.btnOK.clicked.connect(self.close2)    
             
     def close2(self):
-        
         self.close()
- 
-         
+
+VALUES = []
+
 class WorkTable(QMainWindow):
         def __init__(self):
             super().__init__()
@@ -224,6 +224,7 @@ class WorkTable(QMainWindow):
             self.current_choice = self.stuff.get(100)
         
         def exit_from(self):
+            print(VALUES)
             self.main_window = MainWindow()
             self.main_window.show()
             self.close()
@@ -238,10 +239,32 @@ class WorkTable(QMainWindow):
                 self.dialog2 = DialogBUFFER()
                 self.dialog2.show()
 
+        def save_stats(self,VALUE):
+            try:
+                conn2 = sqlite3.connect("stats.db")
+                cursor2 = conn2.cursor()
+
+                cursor2.execute("SELECT amount FROM stats WHERE name = ?", (VALUE,))
+                result = cursor2.fetchone()
+
+                if result:  
+                    cursor2.execute("UPDATE stats SET amount = amount + 1 WHERE name = ?", (VALUE,))
+                    VALUES.append(VALUE)
+                else:
+                    cursor2.execute("INSERT INTO stats (name, amount) VALUES (?, ?)", (VALUE, 1))
+
+                conn2.commit()
+                conn2.close()
+
+                print("Статистика обновлена")
+            except Exception as e:
+                print(f"Ошибка SQL: {e}")
+
         
         def save_value(self):
             if self.check!= 0:
                 VALUE = self.check
+                self.save_stats(VALUE)
                 self.rows += 1
                 self.table.setRowCount(self.rows)
                 self.table.setItem(self.rows - 1,0,QTableWidgetItem(str(VALUE)))
@@ -309,18 +332,6 @@ class Statistics(QMainWindow):
             self.btn_SAVE.setGeometry(10,190,100,40)
             self.btn_SAVE.clicked.connect(self.clean)
         
-        def refresh_data(self):
-            conn = sqlite3.connect("store.db")
-            cursor = conn.cursor()
-            cursor.execute("SELECT cost FROM your_table_name")  # Указываем нужную таблицу
-            data = cursor.fetchall()
-            self.rows = len(data)
-            self.table.setRowCount(self.rows)
-            for i, row in enumerate(data):
-                self.table.setItem(i, 0, QTableWidgetItem(str(row[0])))
-            conn.close()
-
-        
         def clean(self):
             try:
                 conn = sqlite3.connect("store.db") 
@@ -328,7 +339,7 @@ class Statistics(QMainWindow):
                 
                 cursor.execute("DELETE FROM items")
                 conn.commit()
-
+                
                 self.succes = DialogSUCCES(2)
                 self.succes.show()
 
@@ -359,7 +370,8 @@ class Statistics(QMainWindow):
 
                 cursor.execute("SELECT * FROM items WHERE name = ?", (new_name,))
                 print(cursor.fetchone())
-
+                self.input.clear()
+                self.input2.clear()
                 conn.close()
             except Exception as e:
                 print(f"Ошибка SQL-запроса: {e}")
@@ -372,3 +384,4 @@ app = QApplication(sys.argv)
 window = MainWindow()
 window.show()
 app.exec()
+
